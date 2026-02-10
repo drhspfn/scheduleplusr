@@ -6,7 +6,12 @@ const api = axios.create();
 
 const getBaseUrl = () => {
   const uni = useAppStore.getState().getCurUni();
-  return uni.apiUrl;
+
+  if (import.meta.env.PROD) {
+    return `https://cors-anywhere.herokuapp.com/${uni.apiUrl}`;
+  }
+
+  return `/api/nuzp`;
 };
 
 api.interceptors.request.use((config) => {
