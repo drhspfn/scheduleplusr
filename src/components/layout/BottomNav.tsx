@@ -1,0 +1,106 @@
+"use client";
+
+import React from "react";
+import { Layout, Typography, Space } from "antd";
+import {
+  HomeOutlined,
+  CalendarOutlined,
+  UserOutlined,
+  SettingOutlined,
+} from "@ant-design/icons";
+import { useRouter, usePathname } from "next/navigation";
+import { useAppStore } from "@/store/useAppStore";
+
+export const BottomNav: React.FC = () => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const { accentColor, theme } = useAppStore();
+
+  const navItems = [
+    { key: "/", icon: <HomeOutlined />, label: "Головна" },
+    { key: "/schedule", icon: <CalendarOutlined />, label: "Розклад" },
+    { key: "student", icon: <UserOutlined />, label: "Профіль", isModal: true },
+    {
+      key: "settings",
+      icon: <SettingOutlined />,
+      label: "Налаштув.",
+      isModal: true,
+    },
+  ];
+
+  const { toggleModal } = useAppStore();
+
+  return (
+    <div
+      className="mobile-bottom-nav"
+      style={{
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 64,
+        background: theme === "dark" ? "#1f1f1f" : "#fff",
+        borderTop: `1px solid ${theme === "dark" ? "#303030" : "#f0f0f0"}`,
+        display: "flex",
+        justifyContent: "space-around",
+        alignItems: "center",
+        zIndex: 1000,
+        paddingBottom: "env(safe-area-inset-bottom)",
+        boxShadow: "0 -2px 10px rgba(0,0,0,0.05)",
+      }}
+    >
+      {navItems.map((item) => {
+        const isActive = pathname === item.key;
+        return (
+          <div
+            key={item.key}
+            onClick={() => {
+              if (item.isModal) {
+                if (item.key === "student") toggleModal("student", true);
+                if (item.key === "settings") toggleModal("uni", true); // Reusing uni modal for settings for now
+              } else {
+                router.push(item.key);
+              }
+            }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              flex: 1,
+              cursor: "pointer",
+              color: isActive ? accentColor : "rgba(0,0,0,0.45)",
+              transition: "all 0.3s",
+            }}
+          >
+            <span
+              style={{
+                fontSize: 20,
+                color: isActive
+                  ? accentColor
+                  : theme === "dark"
+                    ? "rgba(255,255,255,0.45)"
+                    : "rgba(0,0,0,0.45)",
+              }}
+            >
+              {item.icon}
+            </span>
+            <Typography.Text
+              style={{
+                fontSize: 10,
+                color: isActive
+                  ? accentColor
+                  : theme === "dark"
+                    ? "rgba(255,255,255,0.45)"
+                    : "rgba(0,0,0,0.45)",
+                marginTop: 4,
+              }}
+            >
+              {item.label}
+            </Typography.Text>
+          </div>
+        );
+      })}
+    </div>
+  );
+};

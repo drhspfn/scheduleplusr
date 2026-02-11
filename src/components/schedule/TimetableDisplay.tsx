@@ -1,7 +1,5 @@
 "use client";
 
-"use client";
-
 import React, { useEffect, useState, useMemo } from "react";
 import {
   Card,
@@ -15,6 +13,7 @@ import {
   Segmented,
   Modal,
   Button,
+  Grid,
 } from "antd";
 import {
   UnorderedListOutlined,
@@ -28,8 +27,12 @@ import dayjs from "dayjs";
 
 const { Text, Title } = Typography;
 const { RangePicker } = DatePicker;
+const { useBreakpoint } = Grid;
 
 export const TimetableDisplay: React.FC = () => {
+  const screens = useBreakpoint();
+  const isMobile = !screens.md && screens.xs !== undefined;
+
   const {
     selectedStudentId,
     selectedGroupName,
@@ -69,22 +72,65 @@ export const TimetableDisplay: React.FC = () => {
 
   return (
     <div style={{ paddingBottom: 40 }}>
-      <Card style={{ marginBottom: 20 }} bodyStyle={{ padding: 12 }}>
-        <Space wrap style={{ justifyContent: "space-between", width: "100%" }}>
-          <Space wrap>
-            <RangePicker
-              value={[dayjs(dateRange[0]), dayjs(dateRange[1])]}
-              onChange={(dates) => {
-                if (dates && dates[0] && dates[1]) {
-                  setDateRange([
-                    dates[0].format("YYYY-MM-DD"),
-                    dates[1].format("YYYY-MM-DD"),
-                  ]);
-                }
-              }}
-              allowClear={false}
-              placeholder={["Початок", "Кінець"]}
-            />
+      <Card style={{ marginBottom: 16 }} styles={{ body: { padding: 12 } }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            flexWrap: "wrap",
+            gap: 12,
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              flexWrap: "wrap",
+              flex: 1,
+              minWidth: isMobile ? "100%" : 280,
+            }}
+          >
+            {isMobile ? (
+              <div style={{ display: "flex", gap: 8, width: "100%" }}>
+                <DatePicker
+                  value={dayjs(dateRange[0])}
+                  onChange={(date) => {
+                    if (date)
+                      setDateRange([date.format("YYYY-MM-DD"), dateRange[1]]);
+                  }}
+                  allowClear={false}
+                  placeholder="Старт"
+                  style={{ flex: 1 }}
+                />
+                <DatePicker
+                  value={dayjs(dateRange[1])}
+                  onChange={(date) => {
+                    if (date)
+                      setDateRange([dateRange[0], date.format("YYYY-MM-DD")]);
+                  }}
+                  allowClear={false}
+                  placeholder="Кінець"
+                  style={{ flex: 1 }}
+                />
+              </div>
+            ) : (
+              <RangePicker
+                value={[dayjs(dateRange[0]), dayjs(dateRange[1])]}
+                onChange={(dates) => {
+                  if (dates && dates[0] && dates[1]) {
+                    setDateRange([
+                      dates[0].format("YYYY-MM-DD"),
+                      dates[1].format("YYYY-MM-DD"),
+                    ]);
+                  }
+                }}
+                allowClear={false}
+                placeholder={["Початок", "Кінець"]}
+                style={{ flex: 1, minWidth: 200 }}
+              />
+            )}
             <Segmented
               value={viewMode}
               onChange={(v) => setViewMode(v as "list" | "grid")}
@@ -92,10 +138,24 @@ export const TimetableDisplay: React.FC = () => {
                 { value: "list", icon: <UnorderedListOutlined /> },
                 { value: "grid", icon: <TableOutlined /> },
               ]}
+              style={{
+                width: isMobile ? "100%" : "auto",
+                display: "flex",
+                justifyContent: "center",
+              }}
             />
-          </Space>
-          <Text strong>{selectedGroupName}</Text>
-        </Space>
+          </div>
+          <Text
+            strong
+            style={{
+              whiteSpace: "nowrap",
+              width: isMobile ? "100%" : "auto",
+              textAlign: isMobile ? "center" : "right",
+            }}
+          >
+            {selectedGroupName}
+          </Text>
+        </div>
       </Card>
 
       {data.length === 0 ? (
@@ -152,9 +212,9 @@ const renderListView = (
 ) => (
   <div className="list-view">
     {data.map((day) => (
-      <div key={day.date} style={{ marginBottom: 32 }}>
-        <Divider orientation="horizontal">
-          <span style={{ fontWeight: "bold" }}>
+      <div key={day.date} style={{ marginBottom: 24 }}>
+        <Divider orientation="horizontal" plain style={{ margin: "16px 0" }}>
+          <span style={{ fontWeight: "bold", fontSize: 16 }}>
             {dayjs(day.date).format("dddd, DD MMMM")}
           </span>
         </Divider>
@@ -168,23 +228,54 @@ const renderListView = (
                 lesson.periods[0] && onShowDetail(lesson.periods[0])
               }
               style={{ cursor: "pointer" }}
+              bodyStyle={{ padding: "12px 16px" }}
             >
-              <div className="lesson-flex-container">
-                <div className="time-side">
-                  <Title level={4} style={{ margin: 0 }}>
+              <div
+                className="lesson-flex-container"
+                style={{ display: "flex", gap: 16, alignItems: "center" }}
+              >
+                <div
+                  className="time-side"
+                  style={{
+                    minWidth: 60,
+                    textAlign: "center",
+                    borderRight: "2px solid var(--ant-color-primary)",
+                    paddingRight: 12,
+                  }}
+                >
+                  <Title level={4} style={{ margin: 0, lineHeight: 1 }}>
                     {lesson.number}
                   </Title>
-                  <Text type="secondary">{lesson.periods[0]?.timeStart}</Text>
+                  <Text type="secondary" style={{ fontSize: 11 }}>
+                    {lesson.periods[0]?.timeStart}
+                  </Text>
                 </div>
-                <div className="content-side">
+                <div className="content-side" style={{ flex: 1 }}>
                   {lesson.periods.map((p, i) => (
-                    <div key={i}>
-                      <Text strong>{p.disciplineFullName}</Text>
-                      <br />
-                      <Space size="small" style={{ fontSize: 12 }}>
-                        <Tag>{p.typeStr}</Tag>
+                    <div
+                      key={i}
+                      style={{
+                        marginBottom: i === lesson.periods.length - 1 ? 0 : 8,
+                      }}
+                    >
+                      <Text
+                        strong
+                        style={{
+                          fontSize: 14,
+                          display: "block",
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {p.disciplineFullName}
+                      </Text>
+                      <Space
+                        wrap
+                        size={[8, 4]}
+                        style={{ fontSize: 12, marginTop: 4 }}
+                      >
+                        <Tag style={{ margin: 0 }}>{p.typeStr}</Tag>
                         <Text type="secondary">{p.teachersName}</Text>
-                        <Text strong>{p.classroom}</Text>
+                        {p.classroom && <Text strong>{p.classroom}</Text>}
                       </Space>
                     </div>
                   ))}

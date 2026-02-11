@@ -5,6 +5,7 @@ import { ConfigProvider, theme as antTheme, App as AntApp, Layout } from "antd";
 import { useAppStore } from "@/store/useAppStore";
 import StyledComponentsRegistry from "@/lib/AntdRegistry";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { BottomNav } from "@/components/layout/BottomNav";
 import { UniversityModal } from "@/components/modals/UniversityModal";
 import { StudentModal } from "@/components/modals/StudentModal";
 import dayjs from "dayjs";
@@ -30,6 +31,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           <Layout style={{ minHeight: "100vh" }}>
             <AppHeader />
             <Layout.Content style={{ padding: 16 }}>{children}</Layout.Content>
+            <BottomNav />
             <UniversityModal />
             <StudentModal />
           </Layout>
