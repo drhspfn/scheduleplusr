@@ -25,13 +25,30 @@ export function Providers({ children }: { children: React.ReactNode }) {
             theme === "dark"
               ? antTheme.darkAlgorithm
               : antTheme.defaultAlgorithm,
-          token: { colorPrimary: accentColor, borderRadius: 12 },
+          token: {
+            colorPrimary: accentColor,
+            borderRadius: 12,
+          },
+          cssVar: { key: "app" },
         }}
       >
-        <AntApp>
-          <Layout style={{ minHeight: "100vh" }}>
+        <AntApp
+          style={{
+            minHeight: "100vh",
+            backgroundColor: theme === "dark" ? "#141414" : "#f5f5f5",
+            transition: "background-color 0.3s ease",
+          }}
+        >
+          <Layout style={{ minHeight: "100vh", background: "transparent" }}>
             <AppHeader />
-            <Layout.Content style={{ padding: 16 }}>{children}</Layout.Content>
+            <Layout.Content
+              style={{
+                padding: 16,
+                minHeight: "calc(100vh - 64px)",
+              }}
+            >
+              {children}
+            </Layout.Content>
             <BottomNav />
             <UniversityModal />
             <StudentModal />

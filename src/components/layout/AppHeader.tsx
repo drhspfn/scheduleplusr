@@ -1,9 +1,7 @@
 "use client";
 
-"use client";
-
 import React from "react";
-import { Layout, Button, Space, Typography } from "antd";
+import { Layout, Button, Space, Typography, theme as antTheme } from "antd";
 import {
   SunOutlined,
   MoonOutlined,
@@ -29,6 +27,8 @@ export const AppHeader: React.FC = () => {
 
   const curUni = getCurUni();
 
+  const { token } = antTheme.useToken();
+
   return (
     <Header
       style={{
@@ -39,8 +39,12 @@ export const AppHeader: React.FC = () => {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "0 16px",
-        background: theme === "dark" ? "#141414" : "#fff",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+        background: token.colorBgContainer,
+        boxShadow:
+          theme === "dark"
+            ? "0 2px 8px rgba(0,0,0,0.4)"
+            : "0 2px 8px rgba(0,0,0,0.06)",
+        transition: "all 0.3s ease",
       }}
     >
       <Space style={{ cursor: "pointer" }} onClick={() => router.push("/")}>

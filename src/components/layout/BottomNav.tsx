@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Layout, Typography, Space } from "antd";
+import { Layout, Typography, Space, theme as antTheme } from "antd";
 import {
   HomeOutlined,
   CalendarOutlined,
@@ -14,7 +14,8 @@ import { useAppStore } from "@/store/useAppStore";
 export const BottomNav: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { accentColor, theme } = useAppStore();
+  const { accentColor, theme: currentTheme } = useAppStore();
+  const { token } = antTheme.useToken();
 
   const navItems = [
     { key: "/", icon: <HomeOutlined />, label: "Головна" },
@@ -39,14 +40,15 @@ export const BottomNav: React.FC = () => {
         left: 0,
         right: 0,
         height: 64,
-        background: theme === "dark" ? "#1f1f1f" : "#fff",
-        borderTop: `1px solid ${theme === "dark" ? "#303030" : "#f0f0f0"}`,
+        background: token.colorBgContainer,
+        borderTop: `1px solid ${token.colorBorderSecondary}`,
         display: "flex",
         justifyContent: "space-around",
         alignItems: "center",
         zIndex: 1000,
         paddingBottom: "env(safe-area-inset-bottom)",
         boxShadow: "0 -2px 10px rgba(0,0,0,0.05)",
+        transition: "all 0.3s ease",
       }}
     >
       {navItems.map((item) => {
@@ -78,7 +80,7 @@ export const BottomNav: React.FC = () => {
                 fontSize: 20,
                 color: isActive
                   ? accentColor
-                  : theme === "dark"
+                  : currentTheme === "dark"
                     ? "rgba(255,255,255,0.45)"
                     : "rgba(0,0,0,0.45)",
               }}
@@ -90,7 +92,7 @@ export const BottomNav: React.FC = () => {
                 fontSize: 10,
                 color: isActive
                   ? accentColor
-                  : theme === "dark"
+                  : currentTheme === "dark"
                     ? "rgba(255,255,255,0.45)"
                     : "rgba(0,0,0,0.45)",
                 marginTop: 4,

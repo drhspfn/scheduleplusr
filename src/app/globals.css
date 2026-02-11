@@ -1,6 +1,5 @@
 :root {
   --ant-primary-color: #1677ff;
-  --bg-dark: #141414;
 }
 
 html,
@@ -8,7 +7,6 @@ body {
   overflow-x: hidden;
   margin: 0;
   min-height: 100vh;
-  background-color: var(--bg-dark);
   -webkit-tap-highlight-color: transparent;
 }
 
