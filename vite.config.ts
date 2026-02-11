@@ -3,14 +3,14 @@ import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
-  base: "/scheduleplusr/",
+  base: "/",
   plugins: [
     react(),
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.png", "logo192.png", "logo512.png"],
       manifest: {
-        start_url: "/scheduleplusr/",
+        start_url: "/",
       },
       workbox: {
         runtimeCaching: [

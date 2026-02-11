@@ -10,7 +10,7 @@ CORS(app)
 cache = Cache(app, config={
     'CACHE_TYPE': 'FileSystemCache',
     'CACHE_DIR': '/tmp/flask_cache',
-    'CACHE_DEFAULT_TIMEOUT': 3600 
+    'CACHE_DEFAULT_TIMEOUT': 3600
 })
 
 UNI_MAP = {
@@ -22,7 +22,7 @@ UNI_MAP = {
 def make_cache_key():
     data = request.get_data()
     key_source = f"{request.method}:{request.url}:{data}"
-    return hashlib.md_value(key_source.encode('utf-8')).hexdigest()
+    return hashlib.md5(key_source.encode('utf-8')).hexdigest()
 
 @app.route('/api/proxy/<uni_id>/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'])
 def proxy(uni_id, path):
