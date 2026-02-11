@@ -1,8 +1,12 @@
+"use client";
+
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { Select, Button, message, Form } from "antd";
-import { scheduleApi } from "../../api/scheduleApi";
-import { useAppStore } from "../../store/useAppStore";
-import type { Faculty, Course, Group, Student } from "../../types";
+import { scheduleApi } from "@/lib/scheduleApi";
+import { useAppStore } from "@/store/useAppStore";
+import type { Faculty, Course, Group, Student } from "@/types";
 
 export const SelectionFlow: React.FC<{ onComplete?: () => void }> = ({
   onComplete,

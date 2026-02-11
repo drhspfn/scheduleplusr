@@ -1,3 +1,7 @@
+"use client";
+
+"use client";
+
 import React, { useEffect, useState, useMemo } from "react";
 import {
   Card,
@@ -17,9 +21,9 @@ import {
   TableOutlined,
   InfoCircleOutlined,
 } from "@ant-design/icons";
-import { useAppStore } from "../../store/useAppStore";
-import { scheduleApi } from "../../api/scheduleApi";
-import type { TimetableDay, LessonPeriod } from "../../types";
+import { useAppStore } from "@/store/useAppStore";
+import { scheduleApi } from "@/lib/scheduleApi";
+import type { TimetableDay, LessonPeriod } from "@/types";
 import dayjs from "dayjs";
 
 const { Text, Title } = Typography;

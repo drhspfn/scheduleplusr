@@ -1,6 +1,9 @@
+"use client";
+
+
 import React from "react";
 import { Modal } from "antd";
-import { useAppStore } from "../../store/useAppStore";
+import { useAppStore } from "@/store/useAppStore";
 import { SelectionFlow } from "../shared/SelectionFlow";
 
 export const StudentModal: React.FC = () => {

@@ -1,8 +1,12 @@
+"use client";
+
+"use client";
+
 import React, { useState } from "react";
 import { Modal, List, Input, Avatar } from "antd";
 import { BankOutlined } from "@ant-design/icons";
-import { useAppStore } from "../../store/useAppStore";
-import { UNIVERSITIES } from "../../config/universities";
+import { useAppStore } from "@/store/useAppStore";
+import { UNIVERSITIES } from "@/config/universities";
 
 export const UniversityModal: React.FC = () => {
   const { modals, toggleModal, setUni, selectedUniId } = useAppStore();

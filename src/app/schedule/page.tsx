@@ -1,9 +1,12 @@
+"use client";
+
+
 import React from "react";
-import { TimetableDisplay } from "../components/schedule/TimetableDisplay";
-import { useAppStore } from "../store/useAppStore";
+import { TimetableDisplay } from "@/components/schedule/TimetableDisplay";
+import { useAppStore } from "@/store/useAppStore";
 import { Button, Result } from "antd";
 
-export const SchedulePage: React.FC = () => {
+export default function SchedulePage() {
   const { selectedStudentId, toggleModal } = useAppStore();
 
   if (!selectedStudentId) {
@@ -22,4 +25,4 @@ export const SchedulePage: React.FC = () => {
   }
 
   return <TimetableDisplay />;
-};
+}

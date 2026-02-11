@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import dayjs from "dayjs";
-import type { University } from "../types";
-import { UNIVERSITIES } from "../config/universities";
+import type { University } from "@/types";
+import { UNIVERSITIES } from "@/config/universities";
 
 interface AppState {
   theme: "light" | "dark";

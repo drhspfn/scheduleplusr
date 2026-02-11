@@ -1,3 +1,7 @@
+"use client";
+
+"use client";
+
 import React from "react";
 import { Layout, Button, Space, Typography } from "antd";
 import {
@@ -7,13 +11,13 @@ import {
   UserOutlined,
   SwapOutlined,
 } from "@ant-design/icons";
-import { useAppStore } from "../../store/useAppStore";
-import { useNavigate } from "react-router-dom";
+import { useAppStore } from "@/store/useAppStore";
+import { useRouter } from "next/navigation";
 
 const { Header } = Layout;
 
 export const AppHeader: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const {
     theme,
     accentColor,
@@ -39,7 +43,7 @@ export const AppHeader: React.FC = () => {
         boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
       }}
     >
-      <Space style={{ cursor: "pointer" }} onClick={() => navigate("/")}>
+      <Space style={{ cursor: "pointer" }} onClick={() => router.push("/")}>
         <BankOutlined style={{ fontSize: "22px", color: accentColor }} />
         <Typography.Text
           strong

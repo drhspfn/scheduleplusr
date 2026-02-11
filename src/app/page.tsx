@@ -1,12 +1,16 @@
+"use client";
+
+"use client";
+
 import React from "react";
 import { Typography, Button, Space } from "antd";
 import { CalendarOutlined } from "@ant-design/icons";
-import { useAppStore } from "../store/useAppStore";
-import { useNavigate } from "react-router-dom";
+import { useAppStore } from "@/store/useAppStore";
+import { useRouter } from "next/navigation";
 
-export const HomePage: React.FC = () => {
+export default function HomePage() {
   const { selectedStudentId, toggleModal, getCurUni } = useAppStore();
-  const navigate = useNavigate();
+  const router = useRouter();
   const uni = getCurUni();
 
   return (
@@ -31,7 +35,7 @@ export const HomePage: React.FC = () => {
             <Button
               type="primary"
               size="large"
-              onClick={() => navigate("/schedule")}
+              onClick={() => router.push("/schedule")}
             >
               Відкрити мій розклад
             </Button>
@@ -51,4 +55,4 @@ export const HomePage: React.FC = () => {
       </div>
     </div>
   );
-};
+}

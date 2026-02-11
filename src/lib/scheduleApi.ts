@@ -1,17 +1,11 @@
 import axios from "axios";
-import { useAppStore } from "../store/useAppStore";
+import { useAppStore } from "@/store/useAppStore";
 
 const api = axios.create();
 
 const getBaseUrl = () => {
   const { selectedUniId } = useAppStore.getState();
-
-  if (import.meta.env.PROD) {
-    return `https://schedule-reborn.vercel.app/api/proxy/${selectedUniId}`;
-  }
-
-  const uni = useAppStore.getState().getCurUni();
-  return uni.apiUrl;
+  return `/api/proxy/${selectedUniId}`;
 };
 
 api.interceptors.request.use((config) => {
