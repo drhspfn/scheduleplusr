@@ -40,14 +40,14 @@ export const BottomNav: React.FC = () => {
         left: 0,
         right: 0,
         height: 64,
-        background: token.colorBgContainer,
-        borderTop: `1px solid ${token.colorBorderSecondary}`,
+        background: "var(--bg-container)",
+        borderTop: "1px solid var(--border)",
         display: "flex",
         justifyContent: "space-around",
         alignItems: "center",
         zIndex: 1000,
         paddingBottom: "env(safe-area-inset-bottom)",
-        boxShadow: "0 -2px 10px rgba(0,0,0,0.05)",
+        boxShadow: "0 -2px 10px rgba(0,0,0,0.15)",
         transition: "all 0.3s ease",
       }}
     >
@@ -71,18 +71,16 @@ export const BottomNav: React.FC = () => {
               justifyContent: "center",
               flex: 1,
               cursor: "pointer",
-              color: isActive ? accentColor : "rgba(0,0,0,0.45)",
+              color: isActive ? accentColor : "var(--text)",
               transition: "all 0.3s",
+              opacity: isActive ? 1 : 0.45,
             }}
           >
             <span
               style={{
                 fontSize: 20,
-                color: isActive
-                  ? accentColor
-                  : currentTheme === "dark"
-                    ? "rgba(255,255,255,0.45)"
-                    : "rgba(0,0,0,0.45)",
+                color: isActive ? accentColor : "var(--text)",
+                opacity: isActive ? 1 : 0.45,
               }}
             >
               {item.icon}
@@ -90,11 +88,8 @@ export const BottomNav: React.FC = () => {
             <Typography.Text
               style={{
                 fontSize: 10,
-                color: isActive
-                  ? accentColor
-                  : currentTheme === "dark"
-                    ? "rgba(255,255,255,0.45)"
-                    : "rgba(0,0,0,0.45)",
+                color: isActive ? accentColor : "var(--text)",
+                opacity: isActive ? 1 : 0.45,
                 marginTop: 4,
               }}
             >

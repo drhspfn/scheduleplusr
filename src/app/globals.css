@@ -1,5 +1,17 @@
 :root {
-  --ant-primary-color: #1677ff;
+  --bg-layout: #f5f5f5;
+  --bg-container: #ffffff;
+  --text: rgba(0, 0, 0, 0.88);
+  --border: rgba(0, 0, 0, 0.06);
+  --border-secondary: rgba(0, 0, 0, 0.04);
+}
+
+.dark {
+  --bg-layout: #141414;
+  --bg-container: #1f1f1f;
+  --text: rgba(255, 255, 255, 0.85);
+  --border: rgba(255, 255, 255, 0.15);
+  --border-secondary: rgba(255, 255, 255, 0.1);
 }
 
 html,
@@ -8,6 +20,21 @@ body {
   margin: 0;
   min-height: 100vh;
   -webkit-tap-highlight-color: transparent;
+  background-color: var(--bg-layout);
+  color: var(--text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Modals and Portals */
+.ant-modal-content {
+  border-radius: 16px !important;
+  background-color: var(--bg-container) !important;
+  color: var(--text) !important;
+}
+
+.ant-modal-header, .ant-modal-title {
+  background-color: var(--bg-container) !important;
+  color: var(--text) !important;
 }
 
 @media (max-width: 768px) {
@@ -17,7 +44,7 @@ body {
   
   .ant-layout-content {
     padding: 8px !important;
-    padding-bottom: 80px !important; /* Space for BottomNav */
+    padding-bottom: 80px !important;
   }
 }
 
@@ -27,19 +54,7 @@ body {
   }
 }
 
-body::-webkit-scrollbar {
-  width: 8px;
-}
-
-body::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-body::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-}
-
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -48,43 +63,28 @@ body::-webkit-scrollbar-thumb {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #434343;
+  background: var(--border);
   border-radius: 10px;
-  border: 2px solid transparent;
-  background-clip: content-box;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #555555;
-  background-clip: content-box;
 }
 
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #434343 transparent;
-}
-
-body,
-.ant-layout,
-.ant-layout-header,
+/* Common Components */
 .ant-card {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  background-color: var(--bg-container) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
 }
 
-.ant-card-body a {
-  word-break: break-all;
-  white-space: normal;
-}
-
-.ant-modal-content {
-  border-radius: 16px !important;
+.ant-card-head {
+  border-bottom-color: var(--border) !important;
+  color: var(--text) !important;
 }
 
 .grid-container {
   width: 100%;
   overflow-x: auto;
-  background: var(--ant-color-bg-container);
+  background: var(--bg-container);
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   -webkit-overflow-scrolling: touch;
 }
 
@@ -97,7 +97,7 @@ body,
 
 .schedule-table th,
 .schedule-table td {
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--border-secondary);
   padding: 8px;
   vertical-align: top;
 }
@@ -106,106 +106,39 @@ body,
   position: sticky;
   left: 0;
   z-index: 2;
-  background: var(--ant-color-bg-container);
-  color: var(--ant-color-text);
+  background: var(--bg-container);
+  color: var(--text);
   width: 60px;
   text-align: center;
-  border-right: 1px solid var(--ant-color-border-secondary);
-}
-
-.date-header {
-  text-align: center;
-  font-size: 14px;
-}
-
-.day-name-short {
-  font-size: 11px;
-  text-transform: uppercase;
-  color: #888;
-}
-
-.lesson-num-cell {
-  background: rgba(0, 0, 0, 0.02);
-}
-
-.grid-lesson-item {
-  position: relative;
-  background: var(--ant-color-primary-bg);
-  border: 1px solid var(--ant-color-primary-border);
-  border-radius: 4px;
-  padding: 6px;
-  font-size: 11px;
-  min-height: 60px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.grid-subject {
-  font-weight: bold;
-  line-height: 1.2;
-  margin-bottom: 4px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.grid-teacher {
-  font-size: 10px;
-  color: var(--ant-color-text-description);
-}
-
-.detail-btn {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  opacity: 0.6;
-}
-
-.detail-btn:hover {
-  opacity: 1;
+  border-right: 1px solid var(--border);
 }
 
 .lessons-column {
   display: flex;
   flex-direction: column;
   gap: 0;
-  border: 1px solid var(--ant-color-border-secondary);
+  border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
-}
-
-.lessons-column {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  border: 1px solid var(--ant-color-border-secondary);
-  border-radius: 12px;
-  overflow: hidden;
+  background: var(--bg-container);
 }
 
 .lesson-card-horizontal {
   border-radius: 0 !important;
   border: none !important;
-  border-bottom: 1px solid var(--ant-color-border-secondary) !important;
+  border-bottom: 1px solid var(--border-secondary) !important;
   box-shadow: none !important;
   margin-bottom: 0 !important;
+  background: transparent !important;
 }
 
 .lesson-card-horizontal:last-child {
   border-bottom: none !important;
 }
 
-.lesson-flex-container {
-  display: flex;
-  gap: 16px;
-}
-
 .time-side {
   text-align: center;
-  border-right: 2px solid var(--ant-color-primary);
+  border-right: 2px solid var(--ant-primary-color, #1677ff);
   padding-right: 12px;
   min-width: 50px;
 }
@@ -213,8 +146,16 @@ body,
 .lesson-notice-modal {
   margin-top: 16px;
   padding: 12px;
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--border-secondary);
   border-radius: 8px;
   max-height: 200px;
   overflow-y: auto;
+}
+
+.ant-divider-inner-text {
+  color: var(--text) !important;
+}
+
+.ant-typography {
+  color: inherit !important;
 }

@@ -17,6 +17,21 @@ dayjs.locale("uk");
 export function Providers({ children }: { children: React.ReactNode }) {
   const { theme, accentColor } = useAppStore();
 
+  // Sync theme class with html element for global CSS targeting
+  React.useEffect(() => {
+    const root = window.document.documentElement;
+    root.classList.remove("light", "dark");
+    root.classList.add(theme);
+    root.style.colorScheme = theme;
+    root.style.setProperty("--ant-primary-color", accentColor);
+  }, [theme, accentColor]);
+
+  // Sync body background color with theme
+  React.useEffect(() => {
+    const bgColor = theme === "dark" ? "#141414" : "#f5f5f5";
+    document.body.style.backgroundColor = bgColor;
+  }, [theme]);
+
   return (
     <StyledComponentsRegistry>
       <ConfigProvider
@@ -29,16 +44,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
             colorPrimary: accentColor,
             borderRadius: 12,
           },
-          cssVar: { key: "app" },
+          cssVar: { prefix: "ant" },
         }}
       >
-        <AntApp
-          style={{
-            minHeight: "100vh",
-            backgroundColor: theme === "dark" ? "#141414" : "#f5f5f5",
-            transition: "background-color 0.3s ease",
-          }}
-        >
+        <AntApp style={{ minHeight: "100vh" }}>
           <Layout style={{ minHeight: "100vh", background: "transparent" }}>
             <AppHeader />
             <Layout.Content

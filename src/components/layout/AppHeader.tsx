@@ -39,11 +39,9 @@ export const AppHeader: React.FC = () => {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "0 16px",
-        background: token.colorBgContainer,
-        boxShadow:
-          theme === "dark"
-            ? "0 2px 8px rgba(0,0,0,0.4)"
-            : "0 2px 8px rgba(0,0,0,0.06)",
+        background: "var(--bg-container)",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+        borderBottom: "1px solid var(--border)",
         transition: "all 0.3s ease",
       }}
     >

@@ -315,7 +315,7 @@ const renderListView = (
                 lesson.periods[0] && onShowDetail(lesson.periods[0], day.date)
               }
               style={{ cursor: "pointer" }}
-              bodyStyle={{ padding: "12px 16px" }}
+              styles={{ body: { padding: "12px 16px" } }}
             >
               <div
                 className="lesson-flex-container"
