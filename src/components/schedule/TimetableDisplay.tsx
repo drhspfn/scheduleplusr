@@ -97,7 +97,7 @@ export const TimetableDisplay: React.FC = () => {
       {data.length === 0 ? (
         <Empty description="Розклад не знайдено для обраного періоду" />
       ) : viewMode === "list" ? (
-        renderListView(data)
+        renderListView(data, setSelectedLesson)
       ) : (
         renderGridView(data, allLessonNumbers, setSelectedLesson)
       )}
@@ -142,7 +142,10 @@ export const TimetableDisplay: React.FC = () => {
   );
 };
 
-const renderListView = (data: TimetableDay[]) => (
+const renderListView = (
+  data: TimetableDay[],
+  onShowDetail: (l: LessonPeriod) => void,
+) => (
   <div className="list-view">
     {data.map((day) => (
       <div key={day.date} style={{ marginBottom: 32 }}>
@@ -153,7 +156,15 @@ const renderListView = (data: TimetableDay[]) => (
         </Divider>
         <div className="lessons-column">
           {day.lessons.map((lesson) => (
-            <Card key={lesson.number} className="lesson-card-horizontal">
+            <Card
+              key={lesson.number}
+              className="lesson-card-horizontal"
+              hoverable
+              onClick={() =>
+                lesson.periods[0] && onShowDetail(lesson.periods[0])
+              }
+              style={{ cursor: "pointer" }}
+            >
               <div className="lesson-flex-container">
                 <div className="time-side">
                   <Title level={4} style={{ margin: 0 }}>
@@ -216,7 +227,12 @@ const renderGridView = (
               return (
                 <td key={day.date} className="lesson-cell">
                   {lesson?.periods.map((p, i) => (
-                    <div key={i} className="grid-lesson-item">
+                    <div
+                      key={i}
+                      className="grid-lesson-item"
+                      onClick={() => onShowDetail(p)}
+                      style={{ cursor: "pointer" }}
+                    >
                       <div className="grid-subject">
                         {p.disciplineShortName || p.disciplineFullName}
                       </div>
@@ -225,7 +241,6 @@ const renderGridView = (
                         type="text"
                         size="small"
                         icon={<InfoCircleOutlined />}
-                        onClick={() => onShowDetail(p)}
                         className="detail-btn"
                       />
                     </div>

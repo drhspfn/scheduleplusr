@@ -1,6 +1,6 @@
 import React from "react";
 import { ConfigProvider, Layout, theme as antTheme, App as AntApp } from "antd";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, HashRouter } from "react-router-dom";
 import { useAppStore } from "./store/useAppStore";
 import { AppHeader } from "./components/layout/AppHeader";
 import { UniversityModal } from "./components/modals/UniversityModal";
@@ -24,7 +24,7 @@ const App: React.FC = () => {
       }}
     >
       <AntApp>
-        <BrowserRouter>
+        <HashRouter>
           <Layout style={{ minHeight: "100vh" }}>
             <AppHeader />
 
@@ -38,7 +38,7 @@ const App: React.FC = () => {
             <UniversityModal />
             <StudentModal />
           </Layout>
-        </BrowserRouter>
+        </HashRouter>
       </AntApp>
     </ConfigProvider>
   );
