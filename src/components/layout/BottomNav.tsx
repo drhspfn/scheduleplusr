@@ -57,7 +57,7 @@ export const BottomNav: React.FC = () => {
             onClick={() => {
               if (item.isModal) {
                 if (item.key === "student") toggleModal("student", true);
-                if (item.key === "settings") toggleModal("uni", true); // Reusing uni modal for settings for now
+                if (item.key === "settings") toggleModal("settings", true);
               } else {
                 router.push(item.key);
               }

@@ -15,6 +15,7 @@ interface AppState {
   modals: {
     isUniSearchOpen: boolean;
     isStudentSearchOpen: boolean;
+    isSettingsOpen: boolean;
   };
 
   viewMode: "list" | "grid";
@@ -23,7 +24,7 @@ interface AppState {
   setTheme: (t: "light" | "dark") => void;
   setUni: (id: string) => void;
   setStudent: (id: number | null, groupName: string | null) => void;
-  toggleModal: (modal: "uni" | "student", isOpen: boolean) => void;
+  toggleModal: (modal: "uni" | "student" | "settings", isOpen: boolean) => void;
   setViewMode: (mode: "list" | "grid") => void;
   setDateRange: (range: [string, string]) => void;
   getCurUni: () => University;
@@ -45,7 +46,11 @@ export const useAppStore = create<AppState>()(
       selectedStudentId: null,
       selectedGroupName: null,
 
-      modals: { isUniSearchOpen: false, isStudentSearchOpen: false },
+      modals: {
+        isUniSearchOpen: false,
+        isStudentSearchOpen: false,
+        isSettingsOpen: false,
+      },
 
       viewMode: "list",
       dateRange: getSmartDefaultRange(),
@@ -57,7 +62,11 @@ export const useAppStore = create<AppState>()(
           selectedUniId: id,
           selectedStudentId: null,
           selectedGroupName: null,
-          modals: { isUniSearchOpen: false, isStudentSearchOpen: false }, // Закрываем модалки при смене
+          modals: {
+            isUniSearchOpen: false,
+            isStudentSearchOpen: false,
+            isSettingsOpen: false,
+          }, // Закрываем модалки при смене
         }),
 
       setStudent: (id, groupName) =>
@@ -71,8 +80,11 @@ export const useAppStore = create<AppState>()(
         set((state) => ({
           modals: {
             ...state.modals,
-            [modal === "uni" ? "isUniSearchOpen" : "isStudentSearchOpen"]:
-              isOpen,
+            [modal === "uni"
+              ? "isUniSearchOpen"
+              : modal === "student"
+                ? "isStudentSearchOpen"
+                : "isSettingsOpen"]: isOpen,
           },
         })),
 

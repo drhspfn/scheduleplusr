@@ -8,6 +8,7 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { UniversityModal } from "@/components/modals/UniversityModal";
 import { StudentModal } from "@/components/modals/StudentModal";
+import { SettingsModal } from "@/components/modals/SettingsModal";
 import dayjs from "dayjs";
 import "dayjs/locale/uk";
 
@@ -34,6 +35,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <BottomNav />
             <UniversityModal />
             <StudentModal />
+            <SettingsModal />
           </Layout>
         </AntApp>
       </ConfigProvider>
