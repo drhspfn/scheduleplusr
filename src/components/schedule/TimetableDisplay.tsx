@@ -45,9 +45,10 @@ export const TimetableDisplay: React.FC = () => {
 
   const [data, setData] = useState<TimetableDay[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedLesson, setSelectedLesson] = useState<LessonPeriod | null>(
-    null,
-  );
+  const [selectedLesson, setSelectedLesson] = useState<{
+    lesson: LessonPeriod;
+    date: string;
+  } | null>(null);
 
   useEffect(() => {
     if (selectedStudentId && selectedUniId) {
@@ -64,6 +65,64 @@ export const TimetableDisplay: React.FC = () => {
     data.forEach((day) => day.lessons.forEach((l) => numbers.add(l.number)));
     return Array.from(numbers).sort((a, b) => a - b);
   }, [data]);
+
+  const getGoogleCalendarUrl = (lesson: LessonPeriod, date: string) => {
+    const start = dayjs(
+      `${date} ${lesson.timeStart}`,
+      "YYYY-MM-DD HH:mm",
+    ).format("YYYYMMDDTHHmmss");
+    const end = dayjs(`${date} ${lesson.timeEnd}`, "YYYY-MM-DD HH:mm").format(
+      "YYYYMMDDTHHmmss",
+    );
+
+    const title = encodeURIComponent(lesson.disciplineFullName);
+    const details = encodeURIComponent(
+      `Викладач: ${lesson.teachersName}\nТип: ${lesson.typeStr}\n${lesson.notice || ""}`,
+    );
+    const location = encodeURIComponent(lesson.classroom);
+
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}&location=${location}`;
+  };
+
+  const exportToICS = () => {
+    let icsContent =
+      "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//SchedulePlusReborn//UA\nCALSCALE:GREGORIAN\n";
+
+    data.forEach((day) => {
+      day.lessons.forEach((lesson) => {
+        lesson.periods.forEach((p) => {
+          const start = dayjs(
+            `${day.date} ${p.timeStart}`,
+            "YYYY-MM-DD HH:mm",
+          ).format("YYYYMMDDTHHmmss");
+          const end = dayjs(
+            `${day.date} ${p.timeEnd}`,
+            "YYYY-MM-DD HH:mm",
+          ).format("YYYYMMDDTHHmmss");
+
+          icsContent += "BEGIN:VEVENT\n";
+          icsContent += `DTSTART:${start}\n`;
+          icsContent += `DTEND:${end}\n`;
+          icsContent += `SUMMARY:${p.disciplineFullName}\n`;
+          icsContent += `DESCRIPTION:Викладач: ${p.teachersName}, Тип: ${p.typeStr}\n`;
+          icsContent += `LOCATION:${p.classroom}\n`;
+          icsContent += "END:VEVENT\n";
+        });
+      });
+    });
+
+    icsContent += "END:VCALENDAR";
+
+    const blob = new Blob([icsContent], {
+      type: "text/calendar;charset=utf-8",
+    });
+    const link = document.createElement("a");
+    link.href = window.URL.createObjectURL(blob);
+    link.setAttribute("download", `schedule_${selectedGroupName}.ics`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   if (loading)
     return (
@@ -144,6 +203,12 @@ export const TimetableDisplay: React.FC = () => {
                 justifyContent: "center",
               }}
             />
+            <Button
+              onClick={exportToICS}
+              style={{ width: isMobile ? "100%" : "auto" }}
+            >
+              Експорт .ics (для Google/iOS)
+            </Button>
           </div>
           <Text
             strong
@@ -161,9 +226,13 @@ export const TimetableDisplay: React.FC = () => {
       {data.length === 0 ? (
         <Empty description="Розклад не знайдено для обраного періоду" />
       ) : viewMode === "list" ? (
-        renderListView(data, setSelectedLesson)
+        renderListView(data, (lesson, date) =>
+          setSelectedLesson({ lesson, date }),
+        )
       ) : (
-        renderGridView(data, allLessonNumbers, setSelectedLesson)
+        renderGridView(data, allLessonNumbers, (lesson, date) =>
+          setSelectedLesson({ lesson, date }),
+        )
       )}
 
       <Modal
@@ -171,6 +240,21 @@ export const TimetableDisplay: React.FC = () => {
         open={!!selectedLesson}
         onCancel={() => setSelectedLesson(null)}
         footer={[
+          <Button
+            key="google"
+            type="primary"
+            onClick={() =>
+              window.open(
+                getGoogleCalendarUrl(
+                  selectedLesson!.lesson,
+                  selectedLesson!.date,
+                ),
+                "_blank",
+              )
+            }
+          >
+            Додати в Google Календар
+          </Button>,
           <Button key="close" onClick={() => setSelectedLesson(null)}>
             Закрити
           </Button>,
@@ -178,25 +262,28 @@ export const TimetableDisplay: React.FC = () => {
       >
         {selectedLesson && (
           <Space direction="vertical" style={{ width: "100%" }}>
-            <Title level={4}>{selectedLesson.disciplineFullName}</Title>
+            <Title level={4}>{selectedLesson.lesson.disciplineFullName}</Title>
             <Divider style={{ margin: "12px 0" }} />
             <Text>
-              <b>Викладач:</b>{" "}
-              {selectedLesson.teachersName || selectedLesson.teachersName}
+              <b>Викладач:</b> {selectedLesson.lesson.teachersName}
             </Text>
             <Text>
-              <b>Тип:</b> <Tag color="blue">{selectedLesson.typeStr}</Tag>
+              <b>Тип:</b>{" "}
+              <Tag color="blue">{selectedLesson.lesson.typeStr}</Tag>
             </Text>
             <Text>
-              <b>Час:</b> {selectedLesson.timeStart} — {selectedLesson.timeEnd}
+              <b>Час:</b> {selectedLesson.lesson.timeStart} —{" "}
+              {selectedLesson.lesson.timeEnd}
             </Text>
             <Text>
-              <b>Аудиторія:</b> {selectedLesson.classroom}
+              <b>Аудиторія:</b> {selectedLesson.lesson.classroom}
             </Text>
-            {selectedLesson.notice && (
+            {selectedLesson.lesson.notice && (
               <div
                 className="lesson-notice-modal"
-                dangerouslySetInnerHTML={{ __html: selectedLesson.notice }}
+                dangerouslySetInnerHTML={{
+                  __html: selectedLesson.lesson.notice,
+                }}
               />
             )}
           </Space>
@@ -208,7 +295,7 @@ export const TimetableDisplay: React.FC = () => {
 
 const renderListView = (
   data: TimetableDay[],
-  onShowDetail: (l: LessonPeriod) => void,
+  onShowDetail: (l: LessonPeriod, date: string) => void,
 ) => (
   <div className="list-view">
     {data.map((day) => (
@@ -225,7 +312,7 @@ const renderListView = (
               className="lesson-card-horizontal"
               hoverable
               onClick={() =>
-                lesson.periods[0] && onShowDetail(lesson.periods[0])
+                lesson.periods[0] && onShowDetail(lesson.periods[0], day.date)
               }
               style={{ cursor: "pointer" }}
               bodyStyle={{ padding: "12px 16px" }}
@@ -292,7 +379,7 @@ const renderListView = (
 const renderGridView = (
   data: TimetableDay[],
   allLessonNumbers: number[],
-  onShowDetail: (l: LessonPeriod) => void,
+  onShowDetail: (l: LessonPeriod, date: string) => void,
 ) => (
   <div className="grid-container">
     <table className="schedule-table">
@@ -325,7 +412,7 @@ const renderGridView = (
                     <div
                       key={i}
                       className="grid-lesson-item"
-                      onClick={() => onShowDetail(p)}
+                      onClick={() => onShowDetail(p, day.date)}
                       style={{ cursor: "pointer" }}
                     >
                       <div className="grid-subject">
