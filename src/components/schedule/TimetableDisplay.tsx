@@ -12,6 +12,7 @@ import {
   Segmented,
   Button,
   Grid,
+  message,
 } from "antd";
 import {
   UnorderedListOutlined,
@@ -21,7 +22,7 @@ import {
 import { useAppStore } from "@/store/useAppStore";
 import { scheduleApi } from "@/lib/scheduleApi";
 import type { TimetableDay, LessonPeriod } from "@/types";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { AppLoader } from "../shared/AppLoader";
 import { LessonDetailsModal } from "./LessonDetailsModal";
 
@@ -43,6 +44,9 @@ export const TimetableDisplay: React.FC = () => {
     setDateRange,
   } = useAppStore();
 
+  const [tempDates, setTempDates] = useState<
+    [Dayjs | null, Dayjs | null] | null
+  >(null);
   const [data, setData] = useState<TimetableDay[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedLesson, setSelectedLesson] = useState<{
@@ -65,6 +69,22 @@ export const TimetableDisplay: React.FC = () => {
     data.forEach((day) => day.lessons.forEach((l) => numbers.add(l.number)));
     return Array.from(numbers).sort((a, b) => a - b);
   }, [data]);
+
+  const validateAndSetRange = (start: Dayjs, end: Dayjs) => {
+    const diff = end.diff(start, "day");
+    if (Math.abs(diff) > 30) {
+      message.warning(
+        "Максимальний діапазон — 30 днів. Вибрано перші 30 днів.",
+      );
+      const clampedEnd = start.add(30, "day");
+      setDateRange([
+        start.format("YYYY-MM-DD"),
+        clampedEnd.format("YYYY-MM-DD"),
+      ]);
+    } else {
+      setDateRange([start.format("YYYY-MM-DD"), end.format("YYYY-MM-DD")]);
+    }
+  };
 
   const exportToICS = () => {
     let icsContent =
@@ -192,54 +212,70 @@ export const TimetableDisplay: React.FC = () => {
 
   const renderGridView = () => (
     <div
-      className="grid-container"
+      className="grid-scroll-container"
       style={{
         background: "var(--ant-color-bg-container)",
-        border: "1px solid var(--ant-color-border)",
-        borderRadius: "var(--ant-border-radius)",
-        overflowX: "auto",
-        maxWidth: "100%",
-        display: "block",
-        WebkitOverflowScrolling: "touch",
+        border: "1px solid var(--ant-color-border-secondary)",
+        borderRadius: 12,
+        overflow: "auto",
+        maxHeight: "80vh",
+        position: "relative",
       }}
     >
       <table
-        className="schedule-table"
         style={{
-          borderColor: "var(--ant-color-border-secondary)",
-          width: "max-content",
-          minWidth: "100%",
+          borderCollapse: "separate",
+          borderSpacing: 0,
+          width: "100%",
+          minWidth: isMobile ? 600 : 1000,
+          tableLayout: "fixed",
         }}
       >
         <thead>
           <tr>
             <th
-              className="sticky-col"
               style={{
-                background: "var(--ant-color-bg-container)",
-                borderColor: "var(--ant-color-border-secondary)",
-                width: 50,
-                minWidth: 50,
-                textAlign: "center",
+                position: "sticky",
+                left: 0,
+                top: 0,
+                zIndex: 10,
+                background: "var(--ant-color-bg-elevated)",
+                padding: "12px 8px",
+                width: isMobile ? 50 : 70,
+                borderBottom: "2px solid var(--ant-color-border)",
+                borderRight: "2px solid var(--ant-color-border)",
               }}
             >
-              <Text strong>Пара</Text>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                №
+              </Text>
             </th>
             {data.map((day) => (
               <th
                 key={day.date}
                 style={{
-                  borderColor: "var(--ant-color-border-secondary)",
-                  minWidth: 120,
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 5,
+                  background: "var(--ant-color-bg-container)",
+                  padding: "12px 8px",
+                  borderBottom: "2px solid var(--ant-color-border)",
+                  borderRight: "1px solid var(--ant-color-border-secondary)",
+                  minWidth: isMobile ? 140 : 180,
                 }}
               >
-                <div className="date-header">
-                  <div>{dayjs(day.date).format("DD.MM")}</div>
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: 14, fontWeight: "bold" }}>
+                    {dayjs(day.date).format("DD.MM")}
+                  </div>
                   <div
-                    className="day-name-short"
-                    style={{ color: "var(--ant-color-text-secondary)" }}
+                    style={{
+                      fontSize: 11,
+                      color: "var(--ant-color-text-secondary)",
+                      textTransform: "uppercase",
+                    }}
                   >
-                    {dayjs(day.date).format("ddd")}
+                    {dayjs(day.date).format("dd")}
                   </div>
                 </div>
               </th>
@@ -250,67 +286,89 @@ export const TimetableDisplay: React.FC = () => {
           {allLessonNumbers.map((num) => (
             <tr key={num}>
               <td
-                className="lesson-num-cell sticky-col"
                 style={{
-                  background: "var(--ant-color-bg-container)",
-                  borderColor: "var(--ant-color-border-secondary)",
-                  width: 50,
-                  minWidth: 50,
+                  position: "sticky",
+                  left: 0,
+                  zIndex: 4,
+                  background: "var(--ant-color-bg-elevated)",
                   textAlign: "center",
+                  borderRight: "2px solid var(--ant-color-border)",
+                  borderBottom: "1px solid var(--ant-color-border-secondary)",
+                  padding: "16px 4px",
                 }}
               >
-                <b style={{ display: "block" }}>{num}</b>
-                <span style={{ fontSize: 10, opacity: 0.6 }}>
-                  {data[0]?.lessons.find((l) => l.number === num)?.periods[0]
-                    ?.timeStart || ""}
-                </span>
+                <b style={{ fontSize: 16 }}>{num}</b>
+                <div style={{ fontSize: 10, opacity: 0.6 }}>
+                  {
+                    data[0]?.lessons.find((l) => l.number === num)?.periods[0]
+                      ?.timeStart
+                  }
+                </div>
               </td>
+
               {data.map((day) => {
                 const lesson = day.lessons.find((l) => l.number === num);
                 return (
                   <td
                     key={day.date}
-                    className="lesson-cell"
-                    style={{ borderColor: "var(--ant-color-border-secondary)" }}
+                    style={{
+                      padding: 6,
+                      borderRight:
+                        "1px solid var(--ant-color-border-secondary)",
+                      borderBottom:
+                        "1px solid var(--ant-color-border-secondary)",
+                      verticalAlign: "top",
+                    }}
                   >
                     {lesson?.periods.map((p, i) => (
                       <div
                         key={i}
-                        className="grid-lesson-item"
                         onClick={() =>
                           setSelectedLesson({ lesson: p, date: day.date })
                         }
-                        style={{ cursor: "pointer", padding: "8px 4px" }}
+                        style={{
+                          padding: "8px",
+                          background: "var(--ant-color-fill-alter)",
+                          borderRadius: 6,
+                          fontSize: 12,
+                          cursor: "pointer",
+                          height: "100%",
+                          minHeight: 60,
+                          border: "1px solid transparent",
+                          transition: "all 0.2s",
+                        }}
+                        className="grid-cell-hover"
                       >
                         <div
-                          className="grid-subject"
-                          style={{ fontSize: 12, lineHeight: 1.2 }}
-                        >
-                          {p.disciplineShortName || p.disciplineFullName}
-                        </div>
-                        <div
-                          className="grid-teacher"
                           style={{
-                            color: "var(--ant-color-text-secondary)",
-                            fontSize: 10,
+                            fontWeight: 600,
+                            lineHeight: 1.2,
+                            marginBottom: 4,
                           }}
                         >
-                          {p.teachersName}
+                          {isMobile
+                            ? p.disciplineShortName || p.disciplineFullName
+                            : p.disciplineFullName}
                         </div>
-                        <Button
-                          type="text"
-                          size="small"
-                          icon={
-                            <InfoCircleOutlined
-                              style={{
-                                color: "var(--ant-color-text-description)",
-                                fontSize: 12,
-                              }}
-                            />
-                          }
-                          className="detail-btn"
-                          style={{ position: "absolute", right: 2, top: 2 }}
-                        />
+                        <div
+                          style={{
+                            fontSize: 10,
+                            color: "var(--ant-color-text-secondary)",
+                          }}
+                        >
+                          {p.teachersName.split(" ").slice(0, 2).join(" ")}
+                        </div>
+                        {p.classroom && (
+                          <div
+                            style={{
+                              marginTop: 4,
+                              fontWeight: "bold",
+                              fontSize: 10,
+                            }}
+                          >
+                            🚪 {p.classroom}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </td>
@@ -327,6 +385,11 @@ export const TimetableDisplay: React.FC = () => {
 
   return (
     <div style={{ paddingBottom: 60 }}>
+      <style>{`
+        .grid-scroll-container::-webkit-scrollbar { width: 6px; height: 6px; }
+        .grid-scroll-container::-webkit-scrollbar-thumb { background: #d9d9d9; border-radius: 10px; }
+        .grid-cell-hover:hover { border-color: var(--ant-color-primary) !important; background: var(--ant-color-primary-bg) !important; }
+      `}</style>
       <Card
         style={{ marginBottom: 12, borderRadius: 12 }}
         styles={{ body: { padding: 12 } }}
@@ -337,20 +400,22 @@ export const TimetableDisplay: React.FC = () => {
               <div style={{ display: "flex", gap: 8, width: "100%" }}>
                 <DatePicker
                   value={dayjs(dateRange[0])}
-                  onChange={(date) =>
-                    date &&
-                    setDateRange([date.format("YYYY-MM-DD"), dateRange[1]])
-                  }
+                  onChange={(date) => {
+                    if (date) {
+                      validateAndSetRange(date, dayjs(dateRange[1]));
+                    }
+                  }}
                   allowClear={false}
                   placeholder="Старт"
                   style={{ flex: 1 }}
                 />
                 <DatePicker
                   value={dayjs(dateRange[1])}
-                  onChange={(date) =>
-                    date &&
-                    setDateRange([dateRange[0], date.format("YYYY-MM-DD")])
-                  }
+                  onChange={(date) => {
+                    if (date) {
+                      validateAndSetRange(dayjs(dateRange[0]), date);
+                    }
+                  }}
                   allowClear={false}
                   placeholder="Кінець"
                   style={{ flex: 1 }}
@@ -359,14 +424,21 @@ export const TimetableDisplay: React.FC = () => {
             ) : (
               <RangePicker
                 value={[dayjs(dateRange[0]), dayjs(dateRange[1])]}
-                onChange={(dates) =>
-                  dates?.[0] &&
-                  dates?.[1] &&
-                  setDateRange([
-                    dates[0].format("YYYY-MM-DD"),
-                    dates[1].format("YYYY-MM-DD"),
-                  ])
-                }
+                onCalendarChange={(val) => setTempDates(val)}
+                disabledDate={(current) => {
+                  if (!tempDates || !tempDates[0] || tempDates[1]) return false;
+                  const diff = current.diff(tempDates[0], "day");
+                  return Math.abs(diff) > 30;
+                }}
+                onChange={(dates) => {
+                  if (dates?.[0] && dates?.[1]) {
+                    setDateRange([
+                      dates[0].format("YYYY-MM-DD"),
+                      dates[1].format("YYYY-MM-DD"),
+                    ]);
+                  }
+                  setTempDates(null);
+                }}
                 allowClear={false}
                 style={{ flex: 1 }}
               />
