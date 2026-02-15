@@ -411,25 +411,26 @@ export const TimetableDisplay: React.FC = () => {
                 />
                 <DatePicker
                   value={dayjs(dateRange[1])}
-                  onChange={(date) => {
-                    if (date) {
-                      validateAndSetRange(dayjs(dateRange[0]), date);
-                    }
-                  }}
-                  allowClear={false}
                   placeholder="Кінець"
                   style={{ flex: 1 }}
+                  allowClear={false}
+                  disabledDate={(current) => {
+                    const start = dayjs(dateRange[0]);
+                    return (
+                      current &&
+                      (current.isBefore(start) ||
+                        current.isAfter(start.add(30, "day")))
+                    );
+                  }}
+                  onChange={(date) =>
+                    date && validateAndSetRange(dayjs(dateRange[0]), date)
+                  }
                 />
               </div>
             ) : (
               <RangePicker
                 value={[dayjs(dateRange[0]), dayjs(dateRange[1])]}
                 onCalendarChange={(val) => setTempDates(val)}
-                disabledDate={(current) => {
-                  if (!tempDates || !tempDates[0] || tempDates[1]) return false;
-                  const diff = current.diff(tempDates[0], "day");
-                  return Math.abs(diff) > 30;
-                }}
                 onChange={(dates) => {
                   if (dates?.[0] && dates?.[1]) {
                     setDateRange([
@@ -438,6 +439,12 @@ export const TimetableDisplay: React.FC = () => {
                     ]);
                   }
                   setTempDates(null);
+                }}
+                disabledDate={(current) => {
+                  if (!tempDates || !tempDates[0] || tempDates[1]) return false;
+
+                  const diff = Math.abs(current.diff(tempDates[0], "day"));
+                  return diff > 30;
                 }}
                 allowClear={false}
                 style={{ flex: 1 }}
