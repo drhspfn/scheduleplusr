@@ -7,11 +7,9 @@ import {
   Space,
   Divider,
   Empty,
-  Spin,
   Tag,
   DatePicker,
   Segmented,
-  Modal,
   Button,
   Grid,
 } from "antd";
@@ -24,6 +22,8 @@ import { useAppStore } from "@/store/useAppStore";
 import { scheduleApi } from "@/lib/scheduleApi";
 import type { TimetableDay, LessonPeriod } from "@/types";
 import dayjs from "dayjs";
+import { AppLoader } from "../shared/AppLoader";
+import { LessonDetailsModal } from "./LessonDetailsModal";
 
 const { Text, Title } = Typography;
 const { RangePicker } = DatePicker;
@@ -66,28 +66,9 @@ export const TimetableDisplay: React.FC = () => {
     return Array.from(numbers).sort((a, b) => a - b);
   }, [data]);
 
-  const getGoogleCalendarUrl = (lesson: LessonPeriod, date: string) => {
-    const start = dayjs(
-      `${date} ${lesson.timeStart}`,
-      "YYYY-MM-DD HH:mm",
-    ).format("YYYYMMDDTHHmmss");
-    const end = dayjs(`${date} ${lesson.timeEnd}`, "YYYY-MM-DD HH:mm").format(
-      "YYYYMMDDTHHmmss",
-    );
-
-    const title = encodeURIComponent(lesson.disciplineFullName);
-    const details = encodeURIComponent(
-      `Викладач: ${lesson.teachersName}\nТип: ${lesson.typeStr}\n${lesson.notice || ""}`,
-    );
-    const location = encodeURIComponent(lesson.classroom);
-
-    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}&location=${location}`;
-  };
-
   const exportToICS = () => {
     let icsContent =
       "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//SchedulePlusReborn//UA\nCALSCALE:GREGORIAN\n";
-
     data.forEach((day) => {
       day.lessons.forEach((lesson) => {
         lesson.periods.forEach((p) => {
@@ -99,20 +80,13 @@ export const TimetableDisplay: React.FC = () => {
             `${day.date} ${p.timeEnd}`,
             "YYYY-MM-DD HH:mm",
           ).format("YYYYMMDDTHHmmss");
-
           icsContent += "BEGIN:VEVENT\n";
-          icsContent += `DTSTART:${start}\n`;
-          icsContent += `DTEND:${end}\n`;
-          icsContent += `SUMMARY:${p.disciplineFullName}\n`;
-          icsContent += `DESCRIPTION:Викладач: ${p.teachersName}, Тип: ${p.typeStr}\n`;
-          icsContent += `LOCATION:${p.classroom}\n`;
-          icsContent += "END:VEVENT\n";
+          icsContent += `DTSTART:${start}\nDTEND:${end}\nSUMMARY:${p.disciplineFullName}\n`;
+          icsContent += `DESCRIPTION:Викладач: ${p.teachersName}, Тип: ${p.typeStr}\nLOCATION:${p.classroom}\nEND:VEVENT\n`;
         });
       });
     });
-
     icsContent += "END:VCALENDAR";
-
     const blob = new Blob([icsContent], {
       type: "text/calendar;charset=utf-8",
     });
@@ -124,51 +98,259 @@ export const TimetableDisplay: React.FC = () => {
     document.body.removeChild(link);
   };
 
-  if (loading)
-    return (
-      <Spin size="large" style={{ display: "block", margin: "100px auto" }} />
-    );
-
-  return (
-    <div style={{ paddingBottom: 40 }}>
-      <Card style={{ marginBottom: 16 }} styles={{ body: { padding: 12 } }}>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            flexWrap: "wrap",
-            gap: 12,
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
+  const renderListView = () => (
+    <div className="list-view">
+      {data.map((day) => (
+        <div key={day.date} style={{ marginBottom: 24 }}>
+          <Divider orientation="horizontal" plain style={{ margin: "16px 0" }}>
+            <span style={{ fontWeight: "bold", fontSize: 16 }}>
+              {dayjs(day.date).format("dddd, DD MMMM")}
+            </span>
+          </Divider>
           <div
+            className="lessons-column"
             style={{
-              display: "flex",
-              gap: 8,
-              flexWrap: "wrap",
-              flex: 1,
-              minWidth: isMobile ? "100%" : 280,
+              border: "1px solid var(--ant-color-border)",
+              borderRadius: "var(--ant-border-radius)",
+              background: "var(--ant-color-bg-container)",
             }}
           >
+            {day.lessons.map((lesson) => (
+              <Card
+                key={lesson.number}
+                className="lesson-card-horizontal"
+                hoverable
+                onClick={() =>
+                  lesson.periods[0] &&
+                  setSelectedLesson({
+                    lesson: lesson.periods[0],
+                    date: day.date,
+                  })
+                }
+                style={{
+                  cursor: "pointer",
+                  background: "transparent",
+                  borderBottom: "1px solid var(--ant-color-split)",
+                }}
+                styles={{ body: { padding: "12px 16px" } }}
+                bordered={false}
+              >
+                <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+                  <div
+                    style={{
+                      minWidth: 50,
+                      textAlign: "center",
+                      borderRight: "2px solid var(--ant-color-primary)",
+                      paddingRight: 12,
+                    }}
+                  >
+                    <Title level={4} style={{ margin: 0, lineHeight: 1 }}>
+                      {lesson.number}
+                    </Title>
+                    <Text type="secondary" style={{ fontSize: 11 }}>
+                      {lesson.periods[0]?.timeStart}
+                    </Text>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    {lesson.periods.map((p, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          marginBottom: i === lesson.periods.length - 1 ? 0 : 8,
+                        }}
+                      >
+                        <Text
+                          strong
+                          style={{
+                            fontSize: 14,
+                            display: "block",
+                            lineHeight: 1.2,
+                          }}
+                        >
+                          {p.disciplineFullName}
+                        </Text>
+                        <Space
+                          wrap
+                          size={[8, 4]}
+                          style={{ fontSize: 12, marginTop: 4 }}
+                        >
+                          <Tag style={{ margin: 0 }}>{p.typeStr}</Tag>
+                          <Text type="secondary">{p.teachersName}</Text>
+                          {p.classroom && <Text strong>{p.classroom}</Text>}
+                        </Space>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderGridView = () => (
+    <div
+      className="grid-container"
+      style={{
+        background: "var(--ant-color-bg-container)",
+        border: "1px solid var(--ant-color-border)",
+        borderRadius: "var(--ant-border-radius)",
+        overflowX: "auto",
+        maxWidth: "100%",
+        display: "block",
+        WebkitOverflowScrolling: "touch",
+      }}
+    >
+      <table
+        className="schedule-table"
+        style={{
+          borderColor: "var(--ant-color-border-secondary)",
+          width: "max-content",
+          minWidth: "100%",
+        }}
+      >
+        <thead>
+          <tr>
+            <th
+              className="sticky-col"
+              style={{
+                background: "var(--ant-color-bg-container)",
+                borderColor: "var(--ant-color-border-secondary)",
+                width: 50,
+                minWidth: 50,
+                textAlign: "center",
+              }}
+            >
+              <Text strong>Пара</Text>
+            </th>
+            {data.map((day) => (
+              <th
+                key={day.date}
+                style={{
+                  borderColor: "var(--ant-color-border-secondary)",
+                  minWidth: 120,
+                }}
+              >
+                <div className="date-header">
+                  <div>{dayjs(day.date).format("DD.MM")}</div>
+                  <div
+                    className="day-name-short"
+                    style={{ color: "var(--ant-color-text-secondary)" }}
+                  >
+                    {dayjs(day.date).format("ddd")}
+                  </div>
+                </div>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {allLessonNumbers.map((num) => (
+            <tr key={num}>
+              <td
+                className="lesson-num-cell sticky-col"
+                style={{
+                  background: "var(--ant-color-bg-container)",
+                  borderColor: "var(--ant-color-border-secondary)",
+                  width: 50,
+                  minWidth: 50,
+                  textAlign: "center",
+                }}
+              >
+                <b style={{ display: "block" }}>{num}</b>
+                <span style={{ fontSize: 10, opacity: 0.6 }}>
+                  {data[0]?.lessons.find((l) => l.number === num)?.periods[0]
+                    ?.timeStart || ""}
+                </span>
+              </td>
+              {data.map((day) => {
+                const lesson = day.lessons.find((l) => l.number === num);
+                return (
+                  <td
+                    key={day.date}
+                    className="lesson-cell"
+                    style={{ borderColor: "var(--ant-color-border-secondary)" }}
+                  >
+                    {lesson?.periods.map((p, i) => (
+                      <div
+                        key={i}
+                        className="grid-lesson-item"
+                        onClick={() =>
+                          setSelectedLesson({ lesson: p, date: day.date })
+                        }
+                        style={{ cursor: "pointer", padding: "8px 4px" }}
+                      >
+                        <div
+                          className="grid-subject"
+                          style={{ fontSize: 12, lineHeight: 1.2 }}
+                        >
+                          {p.disciplineShortName || p.disciplineFullName}
+                        </div>
+                        <div
+                          className="grid-teacher"
+                          style={{
+                            color: "var(--ant-color-text-secondary)",
+                            fontSize: 10,
+                          }}
+                        >
+                          {p.teachersName}
+                        </div>
+                        <Button
+                          type="text"
+                          size="small"
+                          icon={
+                            <InfoCircleOutlined
+                              style={{
+                                color: "var(--ant-color-text-description)",
+                                fontSize: 12,
+                              }}
+                            />
+                          }
+                          className="detail-btn"
+                          style={{ position: "absolute", right: 2, top: 2 }}
+                        />
+                      </div>
+                    ))}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  if (loading) return <AppLoader />;
+
+  return (
+    <div style={{ paddingBottom: 60 }}>
+      <Card
+        style={{ marginBottom: 12, borderRadius: 12 }}
+        styles={{ body: { padding: 12 } }}
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ display: "flex", gap: 8, width: "100%" }}>
             {isMobile ? (
               <div style={{ display: "flex", gap: 8, width: "100%" }}>
                 <DatePicker
                   value={dayjs(dateRange[0])}
-                  onChange={(date) => {
-                    if (date)
-                      setDateRange([date.format("YYYY-MM-DD"), dateRange[1]]);
-                  }}
+                  onChange={(date) =>
+                    date &&
+                    setDateRange([date.format("YYYY-MM-DD"), dateRange[1]])
+                  }
                   allowClear={false}
                   placeholder="Старт"
                   style={{ flex: 1 }}
                 />
                 <DatePicker
                   value={dayjs(dateRange[1])}
-                  onChange={(date) => {
-                    if (date)
-                      setDateRange([dateRange[0], date.format("YYYY-MM-DD")]);
-                  }}
+                  onChange={(date) =>
+                    date &&
+                    setDateRange([dateRange[0], date.format("YYYY-MM-DD")])
+                  }
                   allowClear={false}
                   placeholder="Кінець"
                   style={{ flex: 1 }}
@@ -177,262 +359,65 @@ export const TimetableDisplay: React.FC = () => {
             ) : (
               <RangePicker
                 value={[dayjs(dateRange[0]), dayjs(dateRange[1])]}
-                onChange={(dates) => {
-                  if (dates && dates[0] && dates[1]) {
-                    setDateRange([
-                      dates[0].format("YYYY-MM-DD"),
-                      dates[1].format("YYYY-MM-DD"),
-                    ]);
-                  }
-                }}
+                onChange={(dates) =>
+                  dates?.[0] &&
+                  dates?.[1] &&
+                  setDateRange([
+                    dates[0].format("YYYY-MM-DD"),
+                    dates[1].format("YYYY-MM-DD"),
+                  ])
+                }
                 allowClear={false}
-                placeholder={["Початок", "Кінець"]}
-                style={{ flex: 1, minWidth: 200 }}
+                style={{ flex: 1 }}
               />
             )}
-            <Segmented
-              value={viewMode}
-              onChange={(v) => setViewMode(v as "list" | "grid")}
-              options={[
-                { value: "list", icon: <UnorderedListOutlined /> },
-                { value: "grid", icon: <TableOutlined /> },
-              ]}
-              style={{
-                width: isMobile ? "100%" : "auto",
-                display: "flex",
-                justifyContent: "center",
-              }}
-            />
-            <Button
-              onClick={exportToICS}
-              style={{ width: isMobile ? "100%" : "auto" }}
-            >
-              Експорт .ics (для Google/iOS)
-            </Button>
           </div>
-          <Text
-            strong
+
+          <div
             style={{
-              whiteSpace: "nowrap",
-              width: isMobile ? "100%" : "auto",
-              textAlign: isMobile ? "center" : "right",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
-            {selectedGroupName}
-          </Text>
+            <Text strong style={{ color: "var(--ant-color-primary)" }}>
+              {selectedGroupName}
+            </Text>
+            <Button onClick={exportToICS} size="small" type="dashed">
+              Експорт .ics
+            </Button>
+          </div>
         </div>
       </Card>
 
+      <div style={{ marginBottom: 16 }}>
+        <Segmented
+          block
+          size="large"
+          value={viewMode}
+          onChange={(v) => setViewMode(v as "list" | "grid")}
+          options={[
+            { label: "Список", value: "list", icon: <UnorderedListOutlined /> },
+            { label: "Таблиця", value: "grid", icon: <TableOutlined /> },
+          ]}
+        />
+      </div>
+
       {data.length === 0 ? (
-        <Empty description="Розклад не знайдено для обраного періоду" />
+        <Empty
+          style={{ marginTop: 40 }}
+          description="Розклад не знайдено для обраного періоду"
+        />
       ) : viewMode === "list" ? (
-        renderListView(data, (lesson, date) =>
-          setSelectedLesson({ lesson, date }),
-        )
+        renderListView()
       ) : (
-        renderGridView(data, allLessonNumbers, (lesson, date) =>
-          setSelectedLesson({ lesson, date }),
-        )
+        renderGridView()
       )}
 
-      <Modal
-        title="Деталі заняття"
-        open={!!selectedLesson}
-        onCancel={() => setSelectedLesson(null)}
-        footer={[
-          <Button
-            key="google"
-            type="primary"
-            onClick={() =>
-              window.open(
-                getGoogleCalendarUrl(
-                  selectedLesson!.lesson,
-                  selectedLesson!.date,
-                ),
-                "_blank",
-              )
-            }
-          >
-            Додати в Google Календар
-          </Button>,
-          <Button key="close" onClick={() => setSelectedLesson(null)}>
-            Закрити
-          </Button>,
-        ]}
-      >
-        {selectedLesson && (
-          <Space direction="vertical" style={{ width: "100%" }}>
-            <Title level={4}>{selectedLesson.lesson.disciplineFullName}</Title>
-            <Divider style={{ margin: "12px 0" }} />
-            <Text>
-              <b>Викладач:</b> {selectedLesson.lesson.teachersName}
-            </Text>
-            <Text>
-              <b>Тип:</b>{" "}
-              <Tag color="blue">{selectedLesson.lesson.typeStr}</Tag>
-            </Text>
-            <Text>
-              <b>Час:</b> {selectedLesson.lesson.timeStart} —{" "}
-              {selectedLesson.lesson.timeEnd}
-            </Text>
-            <Text>
-              <b>Аудиторія:</b> {selectedLesson.lesson.classroom}
-            </Text>
-            {selectedLesson.lesson.notice && (
-              <div
-                className="lesson-notice-modal"
-                dangerouslySetInnerHTML={{
-                  __html: selectedLesson.lesson.notice,
-                }}
-              />
-            )}
-          </Space>
-        )}
-      </Modal>
+      <LessonDetailsModal
+        selectedLesson={selectedLesson}
+        onClose={() => setSelectedLesson(null)}
+      />
     </div>
   );
 };
-
-const renderListView = (
-  data: TimetableDay[],
-  onShowDetail: (l: LessonPeriod, date: string) => void,
-) => (
-  <div className="list-view">
-    {data.map((day) => (
-      <div key={day.date} style={{ marginBottom: 24 }}>
-        <Divider orientation="horizontal" plain style={{ margin: "16px 0" }}>
-          <span style={{ fontWeight: "bold", fontSize: 16 }}>
-            {dayjs(day.date).format("dddd, DD MMMM")}
-          </span>
-        </Divider>
-        <div className="lessons-column">
-          {day.lessons.map((lesson) => (
-            <Card
-              key={lesson.number}
-              className="lesson-card-horizontal"
-              hoverable
-              onClick={() =>
-                lesson.periods[0] && onShowDetail(lesson.periods[0], day.date)
-              }
-              style={{ cursor: "pointer" }}
-              styles={{ body: { padding: "12px 16px" } }}
-            >
-              <div
-                className="lesson-flex-container"
-                style={{ display: "flex", gap: 16, alignItems: "center" }}
-              >
-                <div
-                  className="time-side"
-                  style={{
-                    minWidth: 60,
-                    textAlign: "center",
-                    borderRight: "2px solid var(--ant-color-primary)",
-                    paddingRight: 12,
-                  }}
-                >
-                  <Title level={4} style={{ margin: 0, lineHeight: 1 }}>
-                    {lesson.number}
-                  </Title>
-                  <Text type="secondary" style={{ fontSize: 11 }}>
-                    {lesson.periods[0]?.timeStart}
-                  </Text>
-                </div>
-                <div className="content-side" style={{ flex: 1 }}>
-                  {lesson.periods.map((p, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        marginBottom: i === lesson.periods.length - 1 ? 0 : 8,
-                      }}
-                    >
-                      <Text
-                        strong
-                        style={{
-                          fontSize: 14,
-                          display: "block",
-                          lineHeight: 1.2,
-                        }}
-                      >
-                        {p.disciplineFullName}
-                      </Text>
-                      <Space
-                        wrap
-                        size={[8, 4]}
-                        style={{ fontSize: 12, marginTop: 4 }}
-                      >
-                        <Tag style={{ margin: 0 }}>{p.typeStr}</Tag>
-                        <Text type="secondary">{p.teachersName}</Text>
-                        {p.classroom && <Text strong>{p.classroom}</Text>}
-                      </Space>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
-    ))}
-  </div>
-);
-
-const renderGridView = (
-  data: TimetableDay[],
-  allLessonNumbers: number[],
-  onShowDetail: (l: LessonPeriod, date: string) => void,
-) => (
-  <div className="grid-container">
-    <table className="schedule-table">
-      <thead>
-        <tr>
-          <th className="sticky-col">Пара</th>
-          {data.map((day) => (
-            <th key={day.date}>
-              <div className="date-header">
-                <div>{dayjs(day.date).format("DD.MM")}</div>
-                <div className="day-name-short">
-                  {dayjs(day.date).format("ddd")}
-                </div>
-              </div>
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {allLessonNumbers.map((num) => (
-          <tr key={num}>
-            <td className="lesson-num-cell sticky-col">
-              <b>{num}</b>
-            </td>
-            {data.map((day) => {
-              const lesson = day.lessons.find((l) => l.number === num);
-              return (
-                <td key={day.date} className="lesson-cell">
-                  {lesson?.periods.map((p, i) => (
-                    <div
-                      key={i}
-                      className="grid-lesson-item"
-                      onClick={() => onShowDetail(p, day.date)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <div className="grid-subject">
-                        {p.disciplineShortName || p.disciplineFullName}
-                      </div>
-                      <div className="grid-teacher">{p.teachersName}</div>
-                      <Button
-                        type="text"
-                        size="small"
-                        icon={<InfoCircleOutlined />}
-                        className="detail-btn"
-                      />
-                    </div>
-                  ))}
-                </td>
-              );
-            })}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-);

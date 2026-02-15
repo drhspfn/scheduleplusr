@@ -1,26 +1,26 @@
 "use client";
 
-
-import React from "react";
 import { TimetableDisplay } from "@/components/schedule/TimetableDisplay";
 import { useAppStore } from "@/store/useAppStore";
-import { Button, Result } from "antd";
+import { Card, Typography } from "antd";
+import { SelectionFlow } from "@/components/shared/SelectionFlow";
 
 export default function SchedulePage() {
-  const { selectedStudentId, toggleModal } = useAppStore();
+  const { selectedStudentId } = useAppStore();
 
   if (!selectedStudentId) {
     return (
-      <Result
-        status="warning"
-        title="Студента не обрано"
-        subTitle="Будь ласка, оберіть студента для перегляду розкладу."
-        extra={
-          <Button type="primary" onClick={() => toggleModal("student", true)}>
-            Обрати
-          </Button>
-        }
-      />
+      <div style={{ maxWidth: 480, margin: "40px auto", padding: "0 16px" }}>
+        <Card>
+          <div style={{ textAlign: "center", marginBottom: 24 }}>
+            <Typography.Title level={3}>Вітаємо!</Typography.Title>
+            <Typography.Text type="secondary">
+              Для перегляду розкладу, будь ласка, знайдіть себе у базі.
+            </Typography.Text>
+          </div>
+          <SelectionFlow />
+        </Card>
+      </div>
     );
   }
 

@@ -1,161 +1,41 @@
-:root {
-  --bg-layout: #f5f5f5;
-  --bg-container: #ffffff;
-  --text: rgba(0, 0, 0, 0.88);
-  --border: rgba(0, 0, 0, 0.06);
-  --border-secondary: rgba(0, 0, 0, 0.04);
+* {
+  box-sizing: border-box;
 }
 
-.dark {
-  --bg-layout: #141414;
-  --bg-container: #1f1f1f;
-  --text: rgba(255, 255, 255, 0.85);
-  --border: rgba(255, 255, 255, 0.15);
-  --border-secondary: rgba(255, 255, 255, 0.1);
-}
-
-html,
 body {
-  overflow-x: hidden;
   margin: 0;
-  min-height: 100vh;
-  -webkit-tap-highlight-color: transparent;
-  background-color: var(--bg-layout);
-  color: var(--text);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  padding: 0;
 }
 
-/* Modals and Portals */
-.ant-modal-content {
-  border-radius: 16px !important;
-  background-color: var(--bg-container) !important;
-  color: var(--text) !important;
-}
-
-.ant-modal-header, .ant-modal-title {
-  background-color: var(--bg-container) !important;
-  color: var(--text) !important;
+::-webkit-scrollbar {
+  width: 0;
 }
 
 @media (max-width: 768px) {
-  .ant-layout-header {
-    display: none !important;
-  }
-  
-  .ant-layout-content {
-    padding: 8px !important;
-    padding-bottom: 80px !important;
-  }
+  .ant-layout-header { display: none !important; }
+  .ant-layout-content { padding: 8px !important; padding-bottom: 80px !important; }
 }
-
 @media (min-width: 769px) {
-  .mobile-bottom-nav {
-    display: none !important;
-  }
+  .mobile-bottom-nav { display: none !important; }
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 10px;
+[style*="color-scheme: dark"] .ant-select-dropdown,
+[style*="color-scheme: dark"] .ant-picker-dropdown,
+[style*="color-scheme: dark"] .ant-dropdown-menu,
+[style*="color-scheme: dark"] .ant-modal-content, 
+[style*="color-scheme: dark"] .ant-modal-header {
+  background-color: #1f1f1f !important;
+  color: rgba(255, 255, 255, 0.85) !important;
 }
 
-/* Common Components */
-.ant-card {
-  background-color: var(--bg-container) !important;
-  border-color: var(--border) !important;
-  color: var(--text) !important;
+[style*="color-scheme: dark"] .ant-select-item {
+  color: rgba(255, 255, 255, 0.85) !important;
 }
 
-.ant-card-head {
-  border-bottom-color: var(--border) !important;
-  color: var(--text) !important;
+[style*="color-scheme: dark"] .ant-select-item-option-selected {
+  background-color: rgba(255, 255, 255, 0.15) !important;
 }
 
-.grid-container {
-  width: 100%;
-  overflow-x: auto;
-  background: var(--bg-container);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  -webkit-overflow-scrolling: touch;
-}
-
-.schedule-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-  min-width: 800px;
-}
-
-.schedule-table th,
-.schedule-table td {
-  border: 1px solid var(--border-secondary);
-  padding: 8px;
-  vertical-align: top;
-}
-
-.sticky-col {
-  position: sticky;
-  left: 0;
-  z-index: 2;
-  background: var(--bg-container);
-  color: var(--text);
-  width: 60px;
-  text-align: center;
-  border-right: 1px solid var(--border);
-}
-
-.lessons-column {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--bg-container);
-}
-
-.lesson-card-horizontal {
-  border-radius: 0 !important;
-  border: none !important;
-  border-bottom: 1px solid var(--border-secondary) !important;
-  box-shadow: none !important;
-  margin-bottom: 0 !important;
-  background: transparent !important;
-}
-
-.lesson-card-horizontal:last-child {
-  border-bottom: none !important;
-}
-
-.time-side {
-  text-align: center;
-  border-right: 2px solid var(--ant-primary-color, #1677ff);
-  padding-right: 12px;
-  min-width: 50px;
-}
-
-.lesson-notice-modal {
-  margin-top: 16px;
-  padding: 12px;
-  background: var(--border-secondary);
-  border-radius: 8px;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.ant-divider-inner-text {
-  color: var(--text) !important;
-}
-
-.ant-typography {
-  color: inherit !important;
+[style*="color-scheme: dark"] .ant-select-item-option-active {
+  background-color: rgba(255, 255, 255, 0.08) !important;
 }

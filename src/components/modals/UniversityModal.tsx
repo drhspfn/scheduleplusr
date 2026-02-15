@@ -1,9 +1,7 @@
 "use client";
 
-"use client";
-
 import React, { useState } from "react";
-import { Modal, List, Input, Avatar } from "antd";
+import { Modal, List, Input, Avatar, Typography } from "antd";
 import { BankOutlined } from "@ant-design/icons";
 import { useAppStore } from "@/store/useAppStore";
 import { UNIVERSITIES } from "@/config/universities";
@@ -30,31 +28,50 @@ export const UniversityModal: React.FC = () => {
       />
       <List
         dataSource={filtered}
-        renderItem={(item) => (
-          <List.Item
-            style={{
-              cursor: "pointer",
-              background:
-                item.id === selectedUniId
-                  ? "var(--ant-color-primary-bg)"
-                  : "transparent",
-              borderRadius: 8,
-              padding: "8px 12px",
-            }}
-            onClick={() => setUni(item.id)}
-          >
-            <List.Item.Meta
-              avatar={
-                <Avatar
-                  icon={<BankOutlined />}
-                  style={{ backgroundColor: "var(--ant-color-primary)" }}
-                />
-              }
-              title={item.name}
-              description={item.description}
-            />
-          </List.Item>
-        )}
+        renderItem={(item) => {
+          const isSelected = item.id === selectedUniId;
+          
+          return (
+            <List.Item
+              style={{
+                cursor: "pointer",
+                background: isSelected ? "var(--ant-color-primary-bg)" : "transparent",
+                borderRadius: 8,
+                padding: "8px 12px",
+                border: isSelected 
+                  ? "1px solid var(--ant-color-primary)" 
+                  : "1px solid transparent",
+                marginBottom: 4,
+                transition: "all 0.2s"
+              }}
+              onClick={() => setUni(item.id)}
+            >
+              <List.Item.Meta
+                avatar={
+                  <Avatar
+                    icon={<BankOutlined />}
+                    style={{ 
+                      backgroundColor: isSelected 
+                        ? "var(--ant-color-primary)" 
+                        : "var(--ant-color-fill-secondary)",
+                      color: isSelected ? "#fff" : "var(--ant-color-text-secondary)"
+                    }}
+                  />
+                }
+                title={
+                  <Typography.Text strong={isSelected}>
+                    {item.name}
+                  </Typography.Text>
+                }
+                description={
+                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                    {item.description}
+                  </Typography.Text>
+                }
+              />
+            </List.Item>
+          )
+        }}
       />
     </Modal>
   );

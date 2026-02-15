@@ -16,6 +16,7 @@ interface AppState {
     isUniSearchOpen: boolean;
     isStudentSearchOpen: boolean;
     isSettingsOpen: boolean;
+    isMobileMenuOpen: boolean;
   };
 
   viewMode: "list" | "grid";
@@ -24,7 +25,10 @@ interface AppState {
   setTheme: (t: "light" | "dark") => void;
   setUni: (id: string) => void;
   setStudent: (id: number | null, groupName: string | null) => void;
-  toggleModal: (modal: "uni" | "student" | "settings", isOpen: boolean) => void;
+  toggleModal: (
+    modal: "uni" | "student" | "settings" | "mobileMenu",
+    isOpen: boolean,
+  ) => void;
   setViewMode: (mode: "list" | "grid") => void;
   setDateRange: (range: [string, string]) => void;
   getCurUni: () => University;
@@ -50,6 +54,7 @@ export const useAppStore = create<AppState>()(
         isUniSearchOpen: false,
         isStudentSearchOpen: false,
         isSettingsOpen: false,
+        isMobileMenuOpen: false,
       },
 
       viewMode: "list",
@@ -66,7 +71,8 @@ export const useAppStore = create<AppState>()(
             isUniSearchOpen: false,
             isStudentSearchOpen: false,
             isSettingsOpen: false,
-          }, // Закрываем модалки при смене
+            isMobileMenuOpen: false,
+          },
         }),
 
       setStudent: (id, groupName) =>
@@ -76,18 +82,21 @@ export const useAppStore = create<AppState>()(
           modals: { ...get().modals, isStudentSearchOpen: false },
         }),
 
-      toggleModal: (modal, isOpen) =>
+      toggleModal: (modal, isOpen) => {
+        const modalMap = {
+          uni: "isUniSearchOpen",
+          student: "isStudentSearchOpen",
+          settings: "isSettingsOpen",
+          mobileMenu: "isMobileMenuOpen",
+        } as const;
+
         set((state) => ({
           modals: {
             ...state.modals,
-            [modal === "uni"
-              ? "isUniSearchOpen"
-              : modal === "student"
-                ? "isStudentSearchOpen"
-                : "isSettingsOpen"]: isOpen,
+            [modalMap[modal]]: isOpen,
           },
-        })),
-
+        }));
+      },
       setViewMode: (viewMode) => set({ viewMode }),
       setDateRange: (dateRange) => set({ dateRange }),
 

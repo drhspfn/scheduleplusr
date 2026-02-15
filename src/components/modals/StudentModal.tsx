@@ -1,6 +1,5 @@
 "use client";
 
-
 import React from "react";
 import { Modal } from "antd";
 import { useAppStore } from "@/store/useAppStore";
@@ -15,7 +14,7 @@ export const StudentModal: React.FC = () => {
       open={modals.isStudentSearchOpen}
       onCancel={() => toggleModal("student", false)}
       footer={null}
-      destroyOnClose
+      destroyOnHidden
     >
       <SelectionFlow onComplete={() => toggleModal("student", false)} />
     </Modal>
