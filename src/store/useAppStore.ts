@@ -32,6 +32,7 @@ interface AppState {
   setViewMode: (mode: "list" | "grid") => void;
   setDateRange: (range: [string, string]) => void;
   getCurUni: () => University;
+  setAccentColor: (color: string) => void;
 }
 
 const getSmartDefaultRange = (): [string, string] => {
@@ -99,6 +100,7 @@ export const useAppStore = create<AppState>()(
       },
       setViewMode: (viewMode) => set({ viewMode }),
       setDateRange: (dateRange) => set({ dateRange }),
+      setAccentColor: (accentColor) => set({ accentColor }),
 
       getCurUni: () =>
         UNIVERSITIES.find((u) => u.id === get().selectedUniId) ||
